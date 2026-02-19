@@ -1,0 +1,100 @@
+services:
+  # ─── OpenClaw Platform (Next.js Dashboard) ──────────────────────────────────
+  platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openclaw-platform
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - OPENCLAW_GATEWAY_URL=ws://gateway:18789
+      - OPENCLAW_GATEWAY_PORT=18789
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:-}
+      - WORKER_POOL_URL=http://worker-pool:18790
+    volumes:
+      - openclaw-data:/app/data
+      - openclaw-config:/app/openclaw-config
+    depends_on:
+      gateway:
+        condition: service_healthy
+      worker-pool:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/analytics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ─── OpenClaw Gateway (AI agent backend) ────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    container_name: openclaw-gateway
+    restart: unless-stopped
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+    env_file:
+      - .env
+    environment:
+      - HOME=/home/node
+      - TERM=xterm-256color
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - openclaw-config:/home/node/.openclaw
+      - openclaw-workspace:/home/node/.openclaw/workspace
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:18789/health 2>/dev/null || exit 0"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ─── OpenClaw Worker Pool (sub-agent task execution) ───────────────────────
+  worker-pool:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: openclaw-worker-pool
+    restart: unless-stopped
+    ports:
+      - "${WORKER_POOL_PORT:-18790}:18790"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - WORKER_PORT=18790
+      - MAX_CONCURRENT_WORKERS=8
+      - WORKER_EXEC_TIMEOUT=180000
+      - HOME=/root
+    volumes:
+      - openclaw-config:/app/openclaw-config:ro
+      - openclaw-data:/app/data:ro
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:18790/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  openclaw-data:
+    driver: local
+  openclaw-config:
+    driver: local
+  openclaw-workspace:
+    driver: local

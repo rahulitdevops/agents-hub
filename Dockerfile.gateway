@@ -1,0 +1,31 @@
+# ─── OpenClaw Gateway ──────────────────────────────────────────────────────────
+FROM node:22-bookworm
+
+# Install build dependencies required by openclaw (git, cmake, build tools for native modules)
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      git cmake make g++ python3 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install OpenClaw CLI globally
+RUN npm install -g openclaw@latest
+
+# Copy seed config from project
+COPY config/openclaw /seed-config
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Create openclaw home directory with correct ownership
+RUN mkdir -p /home/node/.openclaw && chown -R node:node /home/node/.openclaw
+RUN chown -R node:node /seed-config
+
+USER node
+ENV HOME=/home/node
+
+EXPOSE 18789
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["openclaw", "gateway", "--port", "18789", "--verbose", "--allow-unconfigured", "--bind", "lan"]

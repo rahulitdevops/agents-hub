@@ -1,0 +1,66 @@
+# Groot's Workspace .gitignore
+# Protect sensitive data if this workspace is ever committed to version control
+
+# Personal/Private Memory (contains personal context)
+MEMORY.md
+memory/
+
+# Sensitive config (if any credential files end up here)
+*.key
+*.pem
+*.env
+*.secret
+.env.local
+
+# State files (runtime data)
+*-state.json
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+logs/
+
+# Node modules (if any)
+node_modules/
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Private notes (if user creates these)
+PRIVATE.md
+private/
+secrets/
+
+---
+
+# What SHOULD be committed (if ever):
+# - SOUL.md
+# - AGENTS.md
+# - IDENTITY.md (minus avatar if sensitive)
+# - TOOLS.md (redact sensitive IPs/hosts first)
+# - HEARTBEAT.md
+# - MODEL-GUIDE.md
+# - README.md
+# - This .gitignore
+
+# What should NEVER be committed:
+# - MEMORY.md (personal context)
+# - memory/*.md (daily logs)
+# - USER.md (could contain personal info)
+# - Any credentials or API keys

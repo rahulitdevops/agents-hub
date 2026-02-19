@@ -1,0 +1,39 @@
+# ─── OpenClaw Worker Pool ─────────────────────────────────────────────────────
+# Runs sub-agent tasks via `openclaw agent --local` with a concurrency pool.
+# Uses the same openclaw CLI build pattern as the platform Dockerfile.
+
+# ─── Stage 1: OpenClaw CLI (native deps on Alpine) ──────────────────────────
+FROM node:22-alpine AS cli-builder
+RUN apk add --no-cache git openssh cmake make g++ python3 linux-headers && \
+    npm install -g openclaw@latest
+
+# ─── Stage 2: Worker Runtime ────────────────────────────────────────────────
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy OpenClaw CLI from cli-builder
+COPY --from=cli-builder /usr/local/lib/node_modules/openclaw /usr/local/lib/node_modules/openclaw
+RUN ln -sf ../lib/node_modules/openclaw/openclaw.mjs /usr/local/bin/openclaw
+
+# Copy seed config (openclaw.json + workspace files) for --local agent mode
+COPY config/openclaw /seed-config
+
+# Copy worker pool server
+COPY worker-pool/ ./worker-pool/
+
+# Copy and setup worker entrypoint
+COPY worker-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
+RUN chmod +x /usr/local/bin/worker-entrypoint.sh
+
+# Create openclaw config directory structure for --local agent mode
+RUN mkdir -p /root/.openclaw/agents/main/agent \
+             /root/.openclaw/agents/main/sessions \
+             /root/.openclaw/workspace \
+             /app/data
+
+EXPOSE 18790
+
+ENTRYPOINT ["worker-entrypoint.sh"]
+CMD ["node", "worker-pool/server.js"]

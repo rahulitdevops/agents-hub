@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.local
+data/
+*.log
+.DS_Store
+.claude/
+
+# Don't exclude config/ — it's needed for gateway seed
+# Don't exclude docker-entrypoint.sh — it's needed for gateway

@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.env
+.env.local
+data/
+*.log
+.DS_Store
+
+# OpenClaw sensitive config (credentials, identity, device auth)
+config/openclaw/credentials/
+config/openclaw/identity/
+config/openclaw/devices/
+config/openclaw/media/
+config/openclaw/logs/
+config/openclaw/completions/
+config/openclaw/browser/
+config/openclaw/openclaw.json.bak*

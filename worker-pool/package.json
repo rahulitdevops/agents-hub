@@ -1,0 +1,10 @@
+{
+  "name": "openclaw-worker-pool",
+  "version": "1.0.0",
+  "description": "Worker pool for executing OpenClaw sub-agent tasks",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
