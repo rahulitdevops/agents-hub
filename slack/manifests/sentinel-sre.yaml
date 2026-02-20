@@ -1,0 +1,97 @@
+# ============================================================
+# Sentinel — SRE Agent
+# Always watching. Monitoring, alerts, reliability.
+# ============================================================
+
+display_information:
+  name: Sentinel
+  description: SRE Agent — monitoring, incident response, reliability, and observability.
+  background_color: "#DC2626"
+  long_description: |
+    Sentinel is the SRE Agent for Agent Hub. It ensures system reliability
+    through monitoring, alerting, incident management, and post-mortem
+    analysis. The guardian of uptime and performance.
+
+    Capabilities:
+    - Monitoring & alerting setup (Prometheus, Grafana, Datadog)
+    - Incident response & triage
+    - SLI/SLO/SLA definition and tracking
+    - Post-mortem & root cause analysis
+    - Capacity planning & load testing
+    - Chaos engineering & resilience testing
+    - On-call runbook creation
+
+features:
+  app_home:
+    home_tab_enabled: true
+    messages_tab_enabled: true
+    messages_tab_read_only_enabled: false
+  bot_user:
+    display_name: Sentinel
+    always_online: true
+
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - channels:history
+      - channels:read
+      - chat:write
+      - chat:write.customize
+      - commands
+      - groups:history
+      - groups:read
+      - im:history
+      - im:read
+      - im:write
+      - mpim:history
+      - mpim:read
+      - reactions:read
+      - reactions:write
+      - users:read
+      - files:read
+      - files:write
+
+settings:
+  event_subscriptions:
+    request_url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+    bot_events:
+      - app_mention
+      - message.channels
+      - message.groups
+      - message.im
+      - message.mpim
+      - reaction_added
+
+  interactivity:
+    is_enabled: true
+    request_url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack/interactions
+
+  slash_commands:
+    - command: /sentinel
+      url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+      description: Talk to Sentinel — the SRE Agent
+      usage_hint: "[SRE task — monitoring, incident, reliability, etc.]"
+      should_escape: false
+
+    - command: /incident
+      url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+      description: Report or triage an incident
+      usage_hint: "[severity: P1-P4] [description]"
+      should_escape: false
+
+    - command: /health
+      url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+      description: Check system health and service status
+      usage_hint: "[optional: service name]"
+      should_escape: false
+
+    - command: /postmortem
+      url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+      description: Generate a post-mortem report for an incident
+      usage_hint: "[incident ID or description]"
+      should_escape: false
+
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false

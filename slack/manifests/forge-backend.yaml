@@ -1,0 +1,89 @@
+# ============================================================
+# Forge — Backend Agent
+# The backbone builder. APIs, databases, server logic.
+# ============================================================
+
+display_information:
+  name: Forge
+  description: Backend Agent — APIs, databases, server logic, and system architecture.
+  background_color: "#0F172A"
+  long_description: |
+    Forge is the Backend Agent for Agent Hub. It handles all server-side
+    engineering tasks — building APIs, designing database schemas, writing
+    business logic, and optimizing backend performance.
+
+    Capabilities:
+    - REST & GraphQL API development
+    - Database schema design and migrations
+    - Authentication & authorization flows
+    - Backend performance optimization
+    - Microservice architecture
+
+features:
+  app_home:
+    home_tab_enabled: true
+    messages_tab_enabled: true
+    messages_tab_read_only_enabled: false
+  bot_user:
+    display_name: Forge
+    always_online: true
+
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - channels:history
+      - channels:read
+      - chat:write
+      - chat:write.customize
+      - commands
+      - groups:history
+      - groups:read
+      - im:history
+      - im:read
+      - im:write
+      - mpim:history
+      - mpim:read
+      - reactions:read
+      - reactions:write
+      - users:read
+      - files:read
+      - files:write
+
+settings:
+  event_subscriptions:
+    request_url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+    bot_events:
+      - app_mention
+      - message.channels
+      - message.groups
+      - message.im
+      - message.mpim
+      - reaction_added
+
+  interactivity:
+    is_enabled: true
+    request_url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack/interactions
+
+  slash_commands:
+    - command: /forge
+      url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+      description: Talk to Forge — the Backend Agent
+      usage_hint: "[backend task — API, DB, logic, etc.]"
+      should_escape: false
+
+    - command: /api
+      url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+      description: Design or review an API endpoint
+      usage_hint: "[method] [endpoint] [description]"
+      should_escape: false
+
+    - command: /schema
+      url: https://${AGENT_HUB_DOMAIN}/api/webhooks/slack
+      description: Design or review a database schema
+      usage_hint: "[table or model name]"
+      should_escape: false
+
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
