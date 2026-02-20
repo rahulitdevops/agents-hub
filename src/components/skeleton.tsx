@@ -4,15 +4,17 @@ import { cn } from "@/lib/utils";
 
 interface SkeletonProps {
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export function Skeleton({ className }: SkeletonProps) {
+export function Skeleton({ className, style }: SkeletonProps) {
   return (
     <div
       className={cn(
         "bg-slate-200 rounded-lg animate-pulse",
         className
       )}
+      style={style}
     />
   );
 }
