@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
-import type { PlatformIntegration } from "./types";
+import type { PlatformIntegration, ChannelIntegration } from "./types";
 
 const SETTINGS_PATH = join(process.cwd(), "data", "settings.json");
 
@@ -25,6 +25,7 @@ export interface PlatformSettings {
   gatewayPort: string;
   providers: ProviderConfig[];
   platformIntegrations: PlatformIntegration[];
+  channelIntegrations: ChannelIntegration[];
 }
 
 // Known provider templates for the UI
@@ -78,6 +79,7 @@ const DEFAULT_SETTINGS: PlatformSettings = {
   gatewayPort: process.env.OPENCLAW_GATEWAY_PORT || "18789",
   providers: [],
   platformIntegrations: [],
+  channelIntegrations: [],
 };
 
 // ─── Settings persistence ───────────────────────────────────────────────────
@@ -114,6 +116,7 @@ export function loadSettings(): PlatformSettings {
           gatewayPort: parsed.gatewayPort || DEFAULT_SETTINGS.gatewayPort,
           providers,
           platformIntegrations: [],
+          channelIntegrations: [],
         };
         // Persist the migrated format so we don't re-migrate on every read
         try {
@@ -126,8 +129,9 @@ export function loadSettings(): PlatformSettings {
       }
 
       const merged = { ...DEFAULT_SETTINGS, ...parsed };
-      // Ensure platformIntegrations exists (backward compat)
+      // Ensure platformIntegrations and channelIntegrations exist (backward compat)
       if (!merged.platformIntegrations) merged.platformIntegrations = [];
+      if (!merged.channelIntegrations) merged.channelIntegrations = [];
       return merged;
     }
   } catch {
@@ -225,6 +229,18 @@ export function maskPlatformIntegrations(integrations: PlatformIntegration[]): P
     ...p,
     credentials: Object.fromEntries(
       Object.entries(p.credentials).map(([k, v]) => [k, maskKey(v)])
+    ),
+  }));
+}
+
+/**
+ * Mask credential values in channel integrations (same pattern as platform integrations).
+ */
+export function maskChannelIntegrations(integrations: ChannelIntegration[]): ChannelIntegration[] {
+  return integrations.map((c) => ({
+    ...c,
+    credentials: Object.fromEntries(
+      Object.entries(c.credentials).map(([k, v]) => [k, maskKey(v)])
     ),
   }));
 }

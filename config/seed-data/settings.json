@@ -1,0 +1,6 @@
+{
+  "gatewayUrl": "ws://gateway:18789",
+  "gatewayPort": "18789",
+  "providers": [],
+  "platformIntegrations": []
+}

@@ -40,6 +40,9 @@ COPY --from=builder /app/.next/static ./.next/static
 # Copy seed config (openclaw.json + workspace files) for --local agent mode
 COPY config/openclaw /seed-config
 
+# Copy seed data (agents.json, tasks.json, settings.json) for first-boot recovery
+COPY config/seed-data /seed-data/data
+
 # Copy and setup platform entrypoint
 COPY platform-entrypoint.sh /usr/local/bin/platform-entrypoint.sh
 RUN chmod +x /usr/local/bin/platform-entrypoint.sh

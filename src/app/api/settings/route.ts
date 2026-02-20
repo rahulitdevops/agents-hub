@@ -5,11 +5,12 @@ import {
   syncAuthProfiles,
   maskProviders,
   maskPlatformIntegrations,
+  maskChannelIntegrations,
   PROVIDER_TEMPLATES,
   type ProviderConfig,
 } from "@/lib/settings";
-import { PLATFORM_TEMPLATES } from "@/lib/platform-integrations";
-import type { PlatformIntegration } from "@/lib/types";
+import { PLATFORM_TEMPLATES, CHANNEL_TEMPLATES } from "@/lib/platform-integrations";
+import type { PlatformIntegration, ChannelIntegration } from "@/lib/types";
 
 // ─── Routes ─────────────────────────────────────────────────────────────────
 
@@ -20,8 +21,10 @@ export async function GET() {
     ...settings,
     providers: maskProviders(settings.providers),
     platformIntegrations: maskPlatformIntegrations(settings.platformIntegrations || []),
+    channelIntegrations: maskChannelIntegrations(settings.channelIntegrations || []),
     providerTemplates: PROVIDER_TEMPLATES,
     platformTemplates: PLATFORM_TEMPLATES,
+    channelTemplates: CHANNEL_TEMPLATES,
   });
 }
 
@@ -79,11 +82,39 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Build updated channel integrations, preserving existing credentials if masked
+    let updatedChannels: ChannelIntegration[] = current.channelIntegrations || [];
+
+    if (Array.isArray(body.channelIntegrations)) {
+      updatedChannels = body.channelIntegrations.map((incoming: ChannelIntegration) => {
+        const existing = (current.channelIntegrations || []).find((c) => c.id === incoming.id);
+
+        // Smart merge credentials: preserve existing value if incoming is masked
+        const mergedCredentials: Record<string, string> = {};
+        for (const [fieldKey, value] of Object.entries(incoming.credentials || {})) {
+          if (value && !value.startsWith("••••")) {
+            mergedCredentials[fieldKey] = value;
+          } else {
+            mergedCredentials[fieldKey] = existing?.credentials?.[fieldKey] || "";
+          }
+        }
+
+        return {
+          id: incoming.id,
+          channel: incoming.channel,
+          label: incoming.label || incoming.channel,
+          credentials: mergedCredentials,
+          enabled: incoming.enabled ?? true,
+        };
+      });
+    }
+
     const updated = {
       gatewayUrl: body.gatewayUrl ?? current.gatewayUrl,
       gatewayPort: body.gatewayPort ?? current.gatewayPort,
       providers: updatedProviders,
       platformIntegrations: updatedIntegrations,
+      channelIntegrations: updatedChannels,
     };
 
     saveSettings(updated);
@@ -95,6 +126,7 @@ export async function POST(req: NextRequest) {
         ...updated,
         providers: maskProviders(updated.providers),
         platformIntegrations: maskPlatformIntegrations(updated.platformIntegrations),
+        channelIntegrations: maskChannelIntegrations(updated.channelIntegrations),
       },
     });
   } catch {
