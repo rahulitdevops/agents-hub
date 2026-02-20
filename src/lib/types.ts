@@ -113,3 +113,13 @@ export interface PlatformIntegration {
   credentials: Record<string, string>;  // field key → value (e.g. { accessKeyId: "AKIA...", secretAccessKey: "..." })
   enabled: boolean;
 }
+
+// ─── Channel Integrations ──────────────────────────────────────────────────
+
+export interface ChannelIntegration {
+  id: string;          // Unique instance ID (e.g. "whatsapp-abc123")
+  channel: string;     // Channel key matching template (e.g. "whatsapp", "slack")
+  label: string;       // Display name
+  credentials: Record<string, string>;  // field key → value
+  enabled: boolean;
+}

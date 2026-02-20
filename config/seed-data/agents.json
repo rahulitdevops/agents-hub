@@ -1,0 +1,212 @@
+{
+  "version": 1,
+  "agents": [
+    {
+      "id": "groot",
+      "name": "Groot",
+      "description": "Director agent — orchestrates all other agents",
+      "role": "director",
+      "avatar": "🌱",
+      "model": "anthropic/claude-sonnet-4-6",
+      "status": "running",
+      "thinking": "high",
+      "temperature": 0.3,
+      "maxTokens": 8192,
+      "systemPrompt": "You are Groot, the Director agent on the Agent Hub Platform. You manage a team of sub-agents and coordinate tasks across them.\n\nCRITICAL: Always read PLATFORM-CONTEXT.md in your workspace before responding — it lists your CURRENT team of agents with their IDs, roles, and status. These agents are REAL and running on the platform. You coordinate them using [AGENT_ACTION] blocks (see AGENT-MANAGEMENT.md).\n\nTo DELEGATE work to an agent, use assign_task:\n[AGENT_ACTION]{\"action\":\"assign_task\",\"params\":{\"agentId\":\"<id from PLATFORM-CONTEXT.md>\",\"input\":\"<task description>\",\"priority\":\"high\"}}[/AGENT_ACTION]\n\nTo CREATE/DELETE/START/STOP agents, use the corresponding action blocks.\n\nWhen the user asks you to coordinate with or assign work to an agent, look up the agent's ID from PLATFORM-CONTEXT.md and use assign_task. Do NOT say agents don't exist if they're listed in PLATFORM-CONTEXT.md.\n\nBe genuinely helpful, not performatively helpful. Skip corporate pleasantries — just do the thing. Have opinions, be resourceful, earn trust through competence. Start WhatsApp messages with 🌱. Mix Hindi/English naturally when the user does.",
+      "skills": [
+        {
+          "id": "sk-orchestration",
+          "name": "Agent Orchestration",
+          "description": "Coordinate and delegate tasks across agents",
+          "enabled": true,
+          "source": "bundled"
+        },
+        {
+          "id": "sk-agent-mgmt",
+          "name": "Agent Management",
+          "description": "Create, configure, and manage sub-agents via action blocks",
+          "enabled": true,
+          "source": "bundled"
+        },
+        {
+          "id": "sk-memory",
+          "name": "Memory Management",
+          "description": "Persistent memory through workspace files",
+          "enabled": true,
+          "source": "workspace"
+        },
+        {
+          "id": "sk-web-search",
+          "name": "Web Search",
+          "description": "Search the web for information",
+          "enabled": true,
+          "source": "bundled"
+        }
+      ],
+      "channels": [
+        {
+          "type": "webchat",
+          "enabled": true,
+          "config": {}
+        },
+        {
+          "type": "whatsapp",
+          "enabled": true,
+          "config": {}
+        }
+      ],
+      "rateLimit": 500,
+      "maxConcurrency": 10,
+      "timeout": 120,
+      "retryPolicy": "exponential",
+      "maxRetries": 3,
+      "dmPolicy": "pairing",
+      "platformAccess": [
+        "*"
+      ],
+      "createdAt": "2026-02-19T08:46:08.049Z",
+      "updatedAt": "2026-02-19T09:04:14.585Z",
+      "metrics": {
+        "uptime": "0d 0h",
+        "cpu": 5.3,
+        "memory": 15.2,
+        "tasksCompleted": 0,
+        "tasksQueued": 0,
+        "avgResponseTime": 0,
+        "errorRate": 0,
+        "lastActive": "never",
+        "tokensUsed": 0,
+        "totalCost": 0
+      }
+    },
+    {
+      "id": "oc-agent-174356d0",
+      "name": "Content Agent",
+      "description": "Writing, content strategy, copywriting, docs, and marketing specialist",
+      "role": "specialist",
+      "avatar": "📝",
+      "model": "anthropic/claude-sonnet-4-5",
+      "status": "running",
+      "thinking": "medium",
+      "temperature": 0.3,
+      "maxTokens": 4096,
+      "systemPrompt": "You are a content specialist. You handle blog posts, copywriting, social media content, documentation, email campaigns, and content strategy. Your writing is clear, engaging, and tailored to the audience. You understand tone, voice, and brand consistency. Always ask about the target audience and purpose before drafting content.",
+      "skills": [],
+      "channels": [
+        {
+          "type": "webchat",
+          "enabled": true,
+          "config": {}
+        }
+      ],
+      "rateLimit": 500,
+      "maxConcurrency": 10,
+      "timeout": 60,
+      "retryPolicy": "exponential",
+      "maxRetries": 3,
+      "dmPolicy": "pairing",
+      "platformAccess": [
+        "github",
+        "aws"
+      ],
+      "createdAt": "2026-02-20T04:09:05.048Z",
+      "updatedAt": "2026-02-20T04:11:42.396Z",
+      "metrics": {
+        "uptime": "0d 0h",
+        "cpu": 0,
+        "memory": 0,
+        "tasksCompleted": 1,
+        "tasksQueued": 0,
+        "avgResponseTime": 0.8,
+        "errorRate": 0,
+        "lastActive": "2026-02-20T04:10:36.532Z",
+        "tokensUsed": 0,
+        "totalCost": 0
+      }
+    },
+    {
+      "id": "oc-agent-2479d1eb",
+      "name": "Backend Agent",
+      "description": "API design, database, server-side logic, Node.js, and backend infrastructure specialist",
+      "role": "specialist",
+      "avatar": "⚙️",
+      "model": "anthropic/claude-sonnet-4-5",
+      "status": "running",
+      "thinking": "medium",
+      "temperature": 0.3,
+      "maxTokens": 4096,
+      "systemPrompt": "You are a senior Backend Engineer specializing in Node.js, REST APIs, databases (SQL/NoSQL), authentication, performance optimization, and server infrastructure. You write clean, scalable, well-documented code. Always think about security, error handling, and edge cases. When given a task, break it into clear steps, implement it thoroughly, and report back with what was done and any issues found.",
+      "skills": [],
+      "channels": [
+        {
+          "type": "webchat",
+          "enabled": true,
+          "config": {}
+        }
+      ],
+      "rateLimit": 500,
+      "maxConcurrency": 10,
+      "timeout": 60,
+      "retryPolicy": "exponential",
+      "maxRetries": 3,
+      "dmPolicy": "pairing",
+      "platformAccess": [],
+      "createdAt": "2026-02-20T04:51:48.253Z",
+      "updatedAt": "2026-02-20T04:53:22.595Z",
+      "metrics": {
+        "uptime": "0d 0h",
+        "cpu": 0,
+        "memory": 0.3,
+        "tasksCompleted": 1,
+        "tasksQueued": 0,
+        "avgResponseTime": 1,
+        "errorRate": 0,
+        "lastActive": "2026-02-20T04:53:22.595Z",
+        "tokensUsed": 0,
+        "totalCost": 0
+      }
+    },
+    {
+      "id": "oc-agent-9937d104",
+      "name": "Frontend Agent",
+      "description": "UI/UX, React, responsive design, performance, and user experience specialist",
+      "role": "specialist",
+      "avatar": "🎨",
+      "model": "anthropic/claude-sonnet-4-5",
+      "status": "running",
+      "thinking": "medium",
+      "temperature": 0.3,
+      "maxTokens": 4096,
+      "systemPrompt": "You are a senior Frontend Engineer specializing in React, Next.js, HTML/CSS, UI/UX design, responsive layouts, accessibility, and performance optimization. You build beautiful, fast, user-friendly interfaces. Always think about mobile responsiveness, loading states, error states, and user experience. When given a task, break it into clear steps, implement it thoroughly, and report back with what was done.",
+      "skills": [],
+      "channels": [
+        {
+          "type": "webchat",
+          "enabled": true,
+          "config": {}
+        }
+      ],
+      "rateLimit": 500,
+      "maxConcurrency": 10,
+      "timeout": 60,
+      "retryPolicy": "exponential",
+      "maxRetries": 3,
+      "dmPolicy": "pairing",
+      "platformAccess": [],
+      "createdAt": "2026-02-20T04:51:48.254Z",
+      "updatedAt": "2026-02-20T04:53:22.578Z",
+      "metrics": {
+        "uptime": "0d 0h",
+        "cpu": 0,
+        "memory": 0.3,
+        "tasksCompleted": 1,
+        "tasksQueued": 0,
+        "avgResponseTime": 1,
+        "errorRate": 0,
+        "lastActive": "2026-02-20T04:53:22.578Z",
+        "tokensUsed": 0,
+        "totalCost": 0
+      }
+    }
+  ]
+}

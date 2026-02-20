@@ -66,5 +66,21 @@ else
   echo "[platform] WARNING: OpenClaw CLI not found in PATH"
 fi
 
+# ── 8. Seed agent data if volume is empty (first boot / volume loss) ───
+# The /app/data/ directory is a Docker volume mount. On first boot it's empty.
+# We seed from /seed-data/data/ which is baked into the Docker image.
+if [ ! -f "/app/data/agents.json" ] && [ -f "/seed-data/data/agents.json" ]; then
+  echo "[platform] Seeding agents.json from image (first boot)..."
+  cp /seed-data/data/agents.json /app/data/agents.json
+fi
+if [ ! -f "/app/data/tasks.json" ] && [ -f "/seed-data/data/tasks.json" ]; then
+  echo "[platform] Seeding tasks.json from image..."
+  cp /seed-data/data/tasks.json /app/data/tasks.json
+fi
+if [ ! -f "/app/data/settings.json" ] && [ -f "/seed-data/data/settings.json" ]; then
+  echo "[platform] Seeding settings.json from image..."
+  cp /seed-data/data/settings.json /app/data/settings.json
+fi
+
 echo "[platform] Agent environment ready. Starting Next.js..."
 exec "$@"

@@ -151,6 +151,47 @@ export const PLATFORM_TEMPLATES: PlatformTemplate[] = [
   },
 ];
 
+// ─── Channel Templates ──────────────────────────────────────────────────────
+
+export const CHANNEL_TEMPLATES: PlatformTemplate[] = [
+  {
+    key: "whatsapp",
+    label: "WhatsApp",
+    icon: "📱",
+    color: "from-green-500 to-emerald-600",
+    description: "WhatsApp Business API — receive and send messages via Meta Cloud API",
+    fields: [
+      { key: "phoneNumberId", label: "Phone Number ID", placeholder: "1234567890...", type: "text", required: true },
+      { key: "accessToken", label: "Permanent Access Token", placeholder: "EAAxxxxxxx...", type: "password", required: true },
+      { key: "verifyToken", label: "Webhook Verify Token", placeholder: "my-secret-verify-token", type: "text", required: true },
+      { key: "businessAccountId", label: "Business Account ID", placeholder: "9876543210", type: "text", required: false },
+    ],
+    envMapping: {
+      phoneNumberId: "WHATSAPP_PHONE_NUMBER_ID",
+      accessToken: "WHATSAPP_ACCESS_TOKEN",
+      verifyToken: "WHATSAPP_VERIFY_TOKEN",
+      businessAccountId: "WHATSAPP_BUSINESS_ACCOUNT_ID",
+    },
+  },
+  {
+    key: "slack",
+    label: "Slack",
+    icon: "💬",
+    color: "from-purple-500 to-violet-600",
+    description: "Slack Bot — receive and respond to messages in Slack workspaces",
+    fields: [
+      { key: "botToken", label: "Bot Token", placeholder: "xoxb-...", type: "password", required: true },
+      { key: "signingSecret", label: "Signing Secret", placeholder: "abc123def456...", type: "password", required: true },
+      { key: "appToken", label: "App Token (Socket Mode)", placeholder: "xapp-...", type: "password", required: false },
+    ],
+    envMapping: {
+      botToken: "SLACK_BOT_TOKEN",
+      signingSecret: "SLACK_SIGNING_SECRET",
+      appToken: "SLACK_APP_TOKEN",
+    },
+  },
+];
+
 // ─── Lookup helpers ─────────────────────────────────────────────────────────
 
 /** Get a platform template by key */
@@ -162,6 +203,20 @@ export function getPlatformTemplate(key: string): PlatformTemplate | undefined {
 export function getPlatformTemplateMap(): Record<string, PlatformTemplate> {
   const map: Record<string, PlatformTemplate> = {};
   for (const t of PLATFORM_TEMPLATES) {
+    map[t.key] = t;
+  }
+  return map;
+}
+
+/** Get a channel template by key */
+export function getChannelTemplate(key: string): PlatformTemplate | undefined {
+  return CHANNEL_TEMPLATES.find((t) => t.key === key);
+}
+
+/** Get all channel templates as a map keyed by channel key */
+export function getChannelTemplateMap(): Record<string, PlatformTemplate> {
+  const map: Record<string, PlatformTemplate> = {};
+  for (const t of CHANNEL_TEMPLATES) {
     map[t.key] = t;
   }
   return map;
