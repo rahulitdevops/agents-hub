@@ -8,17 +8,17 @@ import { cn } from "@/lib/utils";
 import { ModelPicker } from "@/components/model-picker";
 
 const STATUS_STYLES: Record<string, string> = {
-  running: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  paused: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  error: "bg-red-500/15 text-red-400 border-red-500/30",
-  stopped: "bg-slate-500/15 text-slate-400 border-slate-500/30",
-  deploying: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  running: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  paused: "bg-amber-50 text-amber-600 border-amber-200",
+  error: "bg-red-50 text-red-600 border-red-200",
+  stopped: "bg-slate-50 text-slate-500 border-slate-200",
+  deploying: "bg-blue-50 text-blue-600 border-blue-200",
 };
 
 const ROLE_STYLES: Record<string, string> = {
-  director: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  worker: "bg-slate-500/15 text-slate-400 border-slate-500/30",
-  specialist: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+  director: "bg-purple-50 text-purple-600 border-purple-200",
+  worker: "bg-slate-50 text-slate-500 border-slate-200",
+  specialist: "bg-cyan-50 text-cyan-600 border-cyan-200",
 };
 
 
@@ -76,27 +76,27 @@ export function AgentsClient({ agents: initial }: { agents: AgentConfig[] }) {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-2 flex-wrap">
           {(["all", "running", "paused", "error", "stopped"] as const).map((f) => (
-            <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filter === f ? "bg-orange-600 text-white shadow-lg shadow-orange-600/20" : "bg-slate-800/50 text-slate-400 hover:text-white border border-slate-700/50"}`}>
+            <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${filter === f ? "bg-brand-600 text-white shadow-lg shadow-brand-500/20" : "bg-white text-slate-500 hover:text-slate-900 border border-slate-200 shadow-sm"}`}>
               {f.charAt(0).toUpperCase() + f.slice(1)} ({counts[f] || 0})
             </button>
           ))}
         </div>
-        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white rounded-xl text-sm font-medium hover:bg-orange-700 shadow-lg shadow-orange-600/20">
+        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-medium shadow-lg shadow-brand-500/20">
           + New Agent
         </button>
       </div>
 
       {/* Create form */}
       {showCreate && (
-        <div className="bg-slate-800/80 border border-orange-500/30 rounded-2xl p-6 space-y-4">
-          <h3 className="text-white font-semibold text-lg">Create OpenClaw Agent</h3>
+        <div className="bg-white border border-brand-200 rounded-2xl p-6 space-y-4 shadow-sm">
+          <h3 className="text-slate-900 font-semibold text-lg">Create Agent</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-1.5">Agent Name</label>
-              <input value={newAgent.name} onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })} placeholder="My Agent" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+              <label className="block text-sm text-slate-500 mb-1.5">Agent Name</label>
+              <input value={newAgent.name} onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })} placeholder="My Agent" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-brand-500" />
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-1.5">Model</label>
+              <label className="block text-sm text-slate-500 mb-1.5">Model</label>
               <ModelPicker
                 value={newAgent.model}
                 onChange={(modelId) => setNewAgent({ ...newAgent, model: modelId })}
@@ -105,21 +105,21 @@ export function AgentsClient({ agents: initial }: { agents: AgentConfig[] }) {
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-1.5">Avatar Emoji</label>
-              <input value={newAgent.avatar} onChange={(e) => setNewAgent({ ...newAgent, avatar: e.target.value })} placeholder="🤖" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500" maxLength={4} />
+              <label className="block text-sm text-slate-500 mb-1.5">Avatar Emoji</label>
+              <input value={newAgent.avatar} onChange={(e) => setNewAgent({ ...newAgent, avatar: e.target.value })} placeholder="🤖" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-brand-500" maxLength={4} />
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-1.5">Description</label>
-              <input value={newAgent.description} onChange={(e) => setNewAgent({ ...newAgent, description: e.target.value })} placeholder="What does this agent do?" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500" />
+              <label className="block text-sm text-slate-500 mb-1.5">Description</label>
+              <input value={newAgent.description} onChange={(e) => setNewAgent({ ...newAgent, description: e.target.value })} placeholder="What does this agent do?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-brand-500" />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm text-slate-400 mb-1.5">System Prompt</label>
-              <textarea value={newAgent.systemPrompt} onChange={(e) => setNewAgent({ ...newAgent, systemPrompt: e.target.value })} rows={3} placeholder="You are a helpful assistant that..." className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500 resize-none" />
+              <label className="block text-sm text-slate-500 mb-1.5">System Prompt</label>
+              <textarea value={newAgent.systemPrompt} onChange={(e) => setNewAgent({ ...newAgent, systemPrompt: e.target.value })} rows={3} placeholder="You are a helpful assistant that..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-brand-500 resize-none" />
             </div>
           </div>
           <div className="flex justify-end gap-3">
-            <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancel</button>
-            <button onClick={handleCreate} disabled={!newAgent.name || creating} className="px-5 py-2.5 bg-orange-600 text-white rounded-xl text-sm font-medium hover:bg-orange-700 disabled:opacity-50">
+            <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-slate-500 hover:text-slate-900 text-sm">Cancel</button>
+            <button onClick={handleCreate} disabled={!newAgent.name || creating} className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-medium disabled:opacity-50">
               {creating ? "Creating\u2026" : "Create Agent"}
             </button>
           </div>
@@ -134,8 +134,8 @@ export function AgentsClient({ agents: initial }: { agents: AgentConfig[] }) {
             className={cn(
               "rounded-2xl p-5 transition-all border",
               agent.id === GROOT_AGENT_ID
-                ? "border-purple-500/40 bg-gradient-to-br from-slate-800/80 to-purple-900/10 hover:border-purple-400/60"
-                : "border-slate-700/50 bg-slate-800/50 hover:border-slate-600/50"
+                ? "border-purple-200 bg-purple-50/50 hover:border-purple-300"
+                : "bg-white border-slate-200 shadow-sm hover:border-slate-300"
             )}
           >
             <div className="flex items-start justify-between mb-3">
@@ -144,12 +144,12 @@ export function AgentsClient({ agents: initial }: { agents: AgentConfig[] }) {
                   <span className="text-2xl">{agent.avatar}</span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-white font-semibold text-lg">{agent.name}</h3>
+                      <h3 className="text-slate-900 font-semibold text-lg">{agent.name}</h3>
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border ${ROLE_STYLES[agent.role] || ROLE_STYLES.worker}`}>
                         {agent.role}
                       </span>
                     </div>
-                    <p className="text-slate-400 text-sm mt-0.5">{agent.description}</p>
+                    <p className="text-slate-500 text-sm mt-0.5">{agent.description}</p>
                   </div>
                 </div>
               </Link>
@@ -159,10 +159,10 @@ export function AgentsClient({ agents: initial }: { agents: AgentConfig[] }) {
             </div>
 
             <div className="flex items-center gap-2 text-xs text-slate-500 mb-4">
-              <span className="px-2 py-0.5 bg-slate-900/50 rounded-lg">{agent.model.split("/")[1]}</span>
-              <span className="px-2 py-0.5 bg-slate-900/50 rounded-lg">thinking: {agent.thinking}</span>
+              <span className="px-2 py-0.5 bg-slate-50 rounded-lg">{agent.model.split("/")[1]}</span>
+              <span className="px-2 py-0.5 bg-slate-50 rounded-lg">thinking: {agent.thinking}</span>
               {agent.channels.filter(c => c.enabled).map(c => (
-                <span key={c.type} className="px-2 py-0.5 bg-slate-900/50 rounded-lg">{c.type}</span>
+                <span key={c.type} className="px-2 py-0.5 bg-slate-50 rounded-lg">{c.type}</span>
               ))}
             </div>
 
@@ -174,11 +174,11 @@ export function AgentsClient({ agents: initial }: { agents: AgentConfig[] }) {
                 { label: "Tasks", value: String(agent.metrics.tasksCompleted) },
                 { label: "Latency", value: `${agent.metrics.avgResponseTime}s` },
               ].map((m) => (
-                <div key={m.label} className="bg-slate-900/50 rounded-xl p-2.5">
+                <div key={m.label} className="bg-slate-50 rounded-xl p-2.5">
                   <div className="text-xs text-slate-500">{m.label}</div>
-                  <div className="text-white text-sm font-semibold">{m.value}</div>
+                  <div className="text-slate-900 text-sm font-semibold">{m.value}</div>
                   {m.bar !== undefined && (
-                    <div className="w-full bg-slate-700 rounded-full h-1 mt-1.5">
+                    <div className="w-full bg-slate-200 rounded-full h-1 mt-1.5">
                       <div className={`h-1 rounded-full ${m.color}`} style={{ width: `${m.bar}%` }} />
                     </div>
                   )}
@@ -189,15 +189,15 @@ export function AgentsClient({ agents: initial }: { agents: AgentConfig[] }) {
             {/* Actions */}
             <div className="flex gap-2">
               {agent.status !== "running" && (
-                <button onClick={() => handleAction(agent.id, "start")} className="px-3 py-1.5 bg-emerald-600/20 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-600/30">Start</button>
+                <button onClick={() => handleAction(agent.id, "start")} className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-medium hover:bg-emerald-100">Start</button>
               )}
               {agent.status === "running" && (
-                <button onClick={() => handleAction(agent.id, "pause")} className="px-3 py-1.5 bg-amber-600/20 text-amber-400 rounded-lg text-xs font-medium hover:bg-amber-600/30">Pause</button>
+                <button onClick={() => handleAction(agent.id, "pause")} className="px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg text-xs font-medium hover:bg-amber-100">Pause</button>
               )}
               {agent.status !== "stopped" && agent.id !== GROOT_AGENT_ID && (
-                <button onClick={() => handleAction(agent.id, "stop")} className="px-3 py-1.5 bg-red-600/20 text-red-400 rounded-lg text-xs font-medium hover:bg-red-600/30">Stop</button>
+                <button onClick={() => handleAction(agent.id, "stop")} className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100">Stop</button>
               )}
-              <Link href={`/agents/${agent.id}`} className="px-3 py-1.5 bg-slate-600/20 text-slate-400 rounded-lg text-xs font-medium hover:bg-slate-600/30 ml-auto">Configure</Link>
+              <Link href={`/agents/${agent.id}`} className="px-3 py-1.5 bg-slate-50 text-slate-500 rounded-lg text-xs font-medium hover:bg-slate-100 ml-auto">Configure</Link>
             </div>
           </div>
         ))}

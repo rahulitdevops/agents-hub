@@ -40,14 +40,14 @@ export function ThinkingIndicator({ elapsedSeconds, awayDuringRequest }: Thinkin
       <div className="min-w-0">
         {/* Name */}
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-sm font-semibold text-emerald-400">Groot</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500/60 border border-emerald-500/20 font-medium animate-pulse">
+          <span className="text-sm font-semibold text-emerald-600">Groot</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 font-medium animate-pulse">
             typing
           </span>
         </div>
 
         {/* Thinking bubbles */}
-        <div className="inline-flex items-center gap-2 bg-slate-800/50 border border-slate-700/30 rounded-2xl rounded-bl-md px-4 py-3">
+        <div className="inline-flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3">
           {/* Animated dots */}
           <div className="flex gap-1.5">
             {[0, 1, 2].map((i) => (
@@ -55,7 +55,7 @@ export function ThinkingIndicator({ elapsedSeconds, awayDuringRequest }: Thinkin
                 key={i}
                 className={cn(
                   "w-2 h-2 rounded-full transition-colors",
-                  elapsedSeconds > 30 ? "bg-orange-500" : "bg-emerald-500",
+                  elapsedSeconds > 30 ? "bg-brand-500" : "bg-emerald-500",
                 )}
                 style={{
                   animation: "thinking-bounce 1.4s ease-in-out infinite",
@@ -68,7 +68,7 @@ export function ThinkingIndicator({ elapsedSeconds, awayDuringRequest }: Thinkin
           {/* Status text */}
           <span className={cn(
             "text-xs ml-1",
-            awayDuringRequest ? "text-amber-400" : elapsedSeconds > 30 ? "text-orange-400/70" : "text-slate-500"
+            awayDuringRequest ? "text-amber-600" : elapsedSeconds > 30 ? "text-brand-600" : "text-slate-500"
           )}>
             {getMessage()} · {elapsedSeconds}s
           </span>
@@ -76,7 +76,7 @@ export function ThinkingIndicator({ elapsedSeconds, awayDuringRequest }: Thinkin
 
         {/* Extended wait hint */}
         {elapsedSeconds > 20 && (
-          <p className="text-[10px] text-slate-600 mt-1.5 ml-1 animate-in fade-in duration-500">
+          <p className="text-[10px] text-slate-400 mt-1.5 ml-1 animate-in fade-in duration-500">
             {awayDuringRequest
               ? "The agent is running in the background. Your response will appear when ready."
               : "The agent is using tools and running tasks. This can take a moment."}

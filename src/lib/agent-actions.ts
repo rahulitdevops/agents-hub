@@ -11,6 +11,15 @@ import { GROOT_AGENT_ID, type AgentConfig } from "./types";
 import { dispatchToWorkerPoolAsync } from "./worker-client";
 import { loadPlatformIntegrations } from "./settings";
 import { resolveAgentPlatformEnv } from "./platform-integrations";
+import {
+  isDockerAvailable,
+  createAgentContainer,
+  startAgentContainer,
+  stopAgentContainer,
+  removeAgentContainer,
+  execInAgentContainer,
+  dispatchDirectExecution,
+} from "./container-manager";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -164,6 +173,13 @@ function executeCreateAgent(params: Record<string, unknown>): ActionResult {
   // Auto-start the agent
   runtime.startAgent(agent.id);
 
+  // Spawn a dedicated Docker container for this agent
+  if (isDockerAvailable()) {
+    createAgentContainer(agent).catch((err) =>
+      console.error(`[agent-actions] Container create failed for ${agent.name}:`, err),
+    );
+  }
+
   return {
     action: "create_agent",
     success: true,
@@ -270,6 +286,13 @@ function executeDeleteAgent(params: Record<string, unknown>): ActionResult {
     };
   }
 
+  // Remove the agent's dedicated Docker container
+  if (isDockerAvailable()) {
+    removeAgentContainer(name).catch((err) =>
+      console.error(`[agent-actions] Container remove failed for ${name}:`, err),
+    );
+  }
+
   return {
     action: "delete_agent",
     success: true,
@@ -311,6 +334,19 @@ function executeStatusChange(
       success: false,
       message: `Agent "${id}" not found`,
     };
+  }
+
+  // Sync container lifecycle with agent status
+  if (isDockerAvailable() && agent.id !== GROOT_AGENT_ID) {
+    if (action === "start") {
+      startAgentContainer(agent.name).catch((err) =>
+        console.error(`[agent-actions] Container start failed for ${agent!.name}:`, err),
+      );
+    } else if (action === "stop") {
+      stopAgentContainer(agent.name).catch((err) =>
+        console.error(`[agent-actions] Container stop failed for ${agent!.name}:`, err),
+      );
+    }
   }
 
   return {
@@ -374,6 +410,17 @@ function executeAssignTask(params: Record<string, unknown>): ActionResult {
     priority: (params.priority as "critical" | "high" | "medium" | "low") || "medium",
   });
 
+  // If agent is paused or stopped, park the task instead of dispatching
+  if (agent.status === "paused" || agent.status === "stopped") {
+    runtime.updateTask(task.id, { status: "parked" });
+    return {
+      action: "assign_task",
+      success: true,
+      message: `Task "${task.id}" parked for ${agent.name} (agent is ${agent.status}). Drag to Queued on the task board to resume.`,
+      data: { taskId: task.id, agentId, agentName: agent.name, status: "parked" },
+    };
+  }
+
   // Mark task as running
   runtime.updateTask(task.id, { status: "running" });
 
@@ -381,37 +428,106 @@ function executeAssignTask(params: Record<string, unknown>): ActionResult {
   const integrations = loadPlatformIntegrations();
   const platformEnv = resolveAgentPlatformEnv(agent.platformAccess || [], integrations);
 
-  // Dispatch to worker pool asynchronously (fire-and-forget)
-  // The worker will execute `openclaw agent --local` with agent-specific config
-  dispatchToWorkerPoolAsync({
-    agentId: agent.id,
-    agentName: agent.name,
-    model: agent.model,
-    systemPrompt: agent.systemPrompt,
-    taskInput: input,
-    sessionId: `worker-${agent.id}`,
-    thinking: agent.thinking || "medium",
-    platformEnv: Object.keys(platformEnv).length > 0 ? platformEnv : undefined,
-  })
-    .then((asyncRes) => {
-      console.log(`[agent-actions] Task ${task.id} dispatched to worker pool (worker task: ${asyncRes.taskId})`);
-      runtime.updateTask(task.id, {
-        metadata: { ...task.metadata, workerTaskId: asyncRes.taskId },
-      });
-    })
-    .catch((err) => {
-      console.error(`[agent-actions] Failed to dispatch task ${task.id} to worker pool:`, err);
-      runtime.updateTask(task.id, {
-        status: "failed",
-        output: `Worker pool dispatch failed: ${err.message}`,
-      });
-    });
+  // Dispatch task — prefer per-agent Docker container, fallback to direct exec
+  const sessionId = `worker-${agent.id}`;
 
+  if (isDockerAvailable()) {
+    // Container-based: docker exec into agent's dedicated container
+    execInAgentContainer(agent, input, {
+      sessionId,
+      thinking: agent.thinking || "medium",
+      platformEnv: Object.keys(platformEnv).length > 0 ? platformEnv : undefined,
+    })
+      .then((result) => {
+        runtime.updateTask(task.id, {
+          status: result.success ? "completed" : "failed",
+          output: result.reply || result.error || "No output",
+          completedAt: new Date().toISOString(),
+          duration: `${(result.duration / 1000).toFixed(1)}s`,
+          tokensUsed: result.tokensUsed || 0,
+        });
+        // Update agent metrics (success and failure)
+        const existing = runtime.getAgent(agentId);
+        if (existing) {
+          const newTokens = existing.metrics.tokensUsed + (result.tokensUsed || 0);
+          const costPerToken = 0.000003; // ~$3 per 1M tokens average
+          const taskCost = (result.tokensUsed || 0) * costPerToken;
+          const completedCount = existing.metrics.tasksCompleted + (result.success ? 1 : 0);
+          const prevTotal = existing.metrics.tasksCompleted;
+          const newAvg = prevTotal > 0
+            ? +((existing.metrics.avgResponseTime * prevTotal + result.duration / 1000) / (prevTotal + 1)).toFixed(1)
+            : +(result.duration / 1000).toFixed(1);
+
+          runtime.updateAgent(agentId, {
+            metrics: {
+              ...existing.metrics,
+              tasksCompleted: completedCount,
+              tokensUsed: newTokens,
+              totalCost: +(existing.metrics.totalCost + taskCost).toFixed(4),
+              lastActive: new Date().toISOString(),
+              avgResponseTime: newAvg,
+              errorRate: !result.success
+                ? +((existing.metrics.errorRate * prevTotal + 100) / (prevTotal + 1)).toFixed(1)
+                : existing.metrics.errorRate,
+            },
+          });
+        }
+        console.log(`[agent-actions] Task ${task.id} completed via container (${result.success ? "success" : "failed"})`);
+      })
+      .catch((err) => {
+        console.error(`[agent-actions] Container exec failed for task ${task.id}:`, err);
+        runtime.updateTask(task.id, {
+          status: "failed",
+          output: `Container execution failed: ${err.message}`,
+          completedAt: new Date().toISOString(),
+        });
+      });
+  } else {
+    // Fallback: direct execFile in platform container
+    dispatchDirectExecution(agent, task, input, platformEnv, (result) => {
+      runtime.updateTask(task.id, {
+        status: result.success ? "completed" : "failed",
+        output: result.reply || result.error || "No output",
+        completedAt: new Date().toISOString(),
+        duration: `${(result.duration / 1000).toFixed(1)}s`,
+        tokensUsed: result.tokensUsed || 0,
+      });
+      // Update agent metrics (success and failure)
+      const existing = runtime.getAgent(agentId);
+      if (existing) {
+        const newTokens = existing.metrics.tokensUsed + (result.tokensUsed || 0);
+        const costPerToken = 0.000003;
+        const taskCost = (result.tokensUsed || 0) * costPerToken;
+        const completedCount = existing.metrics.tasksCompleted + (result.success ? 1 : 0);
+        const prevTotal = existing.metrics.tasksCompleted;
+        const newAvg = prevTotal > 0
+          ? +((existing.metrics.avgResponseTime * prevTotal + result.duration / 1000) / (prevTotal + 1)).toFixed(1)
+          : +(result.duration / 1000).toFixed(1);
+
+        runtime.updateAgent(agentId, {
+          metrics: {
+            ...existing.metrics,
+            tasksCompleted: completedCount,
+            tokensUsed: newTokens,
+            totalCost: +(existing.metrics.totalCost + taskCost).toFixed(4),
+            lastActive: new Date().toISOString(),
+            avgResponseTime: newAvg,
+            errorRate: !result.success
+              ? +((existing.metrics.errorRate * prevTotal + 100) / (prevTotal + 1)).toFixed(1)
+              : existing.metrics.errorRate,
+          },
+        });
+      }
+      console.log(`[agent-actions] Task ${task.id} completed via direct exec (${result.success ? "success" : "failed"})`);
+    });
+  }
+
+  const mode = isDockerAvailable() ? "container" : "direct";
   return {
     action: "assign_task",
     success: true,
-    message: `Task "${task.id}" dispatched to ${agent.name} via worker pool`,
-    data: { taskId: task.id, agentId, agentName: agent.name },
+    message: `Task "${task.id}" dispatched to ${agent.name} via ${mode} execution`,
+    data: { taskId: task.id, agentId, agentName: agent.name, mode },
   };
 }
 

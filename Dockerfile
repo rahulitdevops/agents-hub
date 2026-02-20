@@ -24,6 +24,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
 # Copy OpenClaw CLI from cli-builder (includes native koffi module)
 # IMPORTANT: The openclaw binary is a symlink to ../lib/node_modules/openclaw/openclaw.mjs

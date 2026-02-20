@@ -23,9 +23,13 @@ COPY config/openclaw /seed-config
 # Copy worker pool server
 COPY worker-pool/ ./worker-pool/
 
-# Copy and setup worker entrypoint
+# Copy and setup entrypoints
 COPY worker-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
 RUN chmod +x /usr/local/bin/worker-entrypoint.sh
+
+# Per-agent container entrypoint (used when platform spawns dedicated agent containers)
+COPY agent-entrypoint.sh /usr/local/bin/agent-entrypoint.sh
+RUN chmod +x /usr/local/bin/agent-entrypoint.sh
 
 # Create openclaw config directory structure for --local agent mode
 RUN mkdir -p /root/.openclaw/agents/main/agent \

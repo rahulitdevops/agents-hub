@@ -4,14 +4,14 @@ import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
-  title: "OpenClaw Platform — AI Agent Management",
-  description: "Deploy, monitor, and manage OpenClaw AI agents from a single control plane.",
+  title: "Agent Hub — AI Agent Management",
+  description: "Deploy, monitor, and manage AI agents from a single control plane.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-slate-950 text-white antialiased">
+    <html lang="en">
+      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
         <div className="flex h-screen overflow-hidden">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden">

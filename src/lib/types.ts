@@ -2,7 +2,7 @@
 
 export type AgentStatus = "running" | "paused" | "error" | "stopped" | "deploying";
 export type AgentRole = "director" | "worker" | "specialist";
-export type TaskStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
+export type TaskStatus = "queued" | "parked" | "running" | "completed" | "failed" | "cancelled";
 export type TaskPriority = "critical" | "high" | "medium" | "low";
 export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 

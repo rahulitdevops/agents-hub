@@ -83,9 +83,9 @@ function DateSeparator({ date }: { date: string }) {
 
   return (
     <div className="flex items-center gap-3 py-2">
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent to-slate-800/60" />
-      <span className="text-[10px] text-slate-600 font-medium uppercase tracking-wider px-2">{label}</span>
-      <div className="h-px flex-1 bg-gradient-to-l from-transparent to-slate-800/60" />
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent to-slate-200" />
+      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider px-2">{label}</span>
+      <div className="h-px flex-1 bg-gradient-to-l from-transparent to-slate-200" />
     </div>
   );
 }
@@ -103,8 +103,8 @@ function WelcomeScreen() {
 
         {/* Title */}
         <div>
-          <h1 className="text-xl font-bold text-white">Groot</h1>
-          <p className="text-sm text-slate-400 mt-1">Director Agent</p>
+          <h1 className="text-xl font-bold text-slate-900">Groot</h1>
+          <p className="text-sm text-slate-500 mt-1">Director Agent</p>
         </div>
 
         {/* Description */}
@@ -115,7 +115,7 @@ function WelcomeScreen() {
 
         {/* Quick suggestions */}
         <div className="space-y-2 pt-2">
-          <p className="text-[10px] text-slate-600 uppercase tracking-wider font-semibold">Try asking</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Try asking</p>
           <div className="flex flex-wrap justify-center gap-2">
             {[
               "What agents do I have?",
@@ -125,7 +125,7 @@ function WelcomeScreen() {
             ].map((suggestion) => (
               <span
                 key={suggestion}
-                className="text-xs px-3 py-1.5 rounded-full bg-slate-800/50 text-slate-400 border border-slate-700/50 cursor-default"
+                className="text-xs px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 cursor-default"
               >
                 {suggestion}
               </span>
@@ -149,22 +149,22 @@ function ChatHeader({
   onClear: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/80 bg-slate-950/50 backdrop-blur-sm">
+    <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-200 bg-white/80 backdrop-blur-sm">
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center text-lg shadow-lg shadow-emerald-500/10">
             🌱
           </div>
           {/* Online indicator */}
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" />
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
         </div>
         <div>
-          <h2 className="text-white font-semibold text-sm leading-tight">Groot</h2>
+          <h2 className="text-slate-900 font-semibold text-sm leading-tight">Groot</h2>
           <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
             <span>Director Agent</span>
             {loading && (
               <>
-                <span className="text-slate-700">·</span>
+                <span className="text-slate-300">·</span>
                 <span className="text-emerald-500 animate-pulse">typing...</span>
               </>
             )}
@@ -175,7 +175,7 @@ function ChatHeader({
       <div className="flex items-center gap-2">
         {/* Message count */}
         {chatCount > 0 && (
-          <span className="text-[10px] px-2 py-1 rounded-lg bg-slate-800/50 text-slate-500 border border-slate-700/30">
+          <span className="text-[10px] px-2 py-1 rounded-lg bg-slate-100 text-slate-500 border border-slate-200">
             {chatCount} msgs
           </span>
         )}
@@ -184,7 +184,7 @@ function ChatHeader({
         {chatCount > 0 && !loading && (
           <button
             onClick={onClear}
-            className="text-[11px] text-slate-500 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/5 border border-transparent hover:border-red-500/20 flex items-center gap-1"
+            className="text-[11px] text-slate-500 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50 border border-transparent hover:border-red-200 flex items-center gap-1"
             title="Clear conversation"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -198,6 +198,11 @@ function ChatHeader({
   );
 }
 
+// ─── Pagination Constants ────────────────────────────────────────────────────
+
+const INITIAL_PAGE_SIZE = 20;
+const PAGE_SIZE = 20;
+
 // ─── Main Page Component ──────────────────────────────────────────────────────
 
 export default function ChatPage() {
@@ -208,16 +213,25 @@ export default function ChatPage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [awayDuringRequest, setAwayDuringRequest] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const prevItemsLengthRef = useRef(0);
+  const isLoadingMoreRef = useRef(false);
 
   // ── Load persisted messages on mount ────────────────────────────────────────
   useEffect(() => {
     const saved = loadMessages();
     if (saved.length > 0) {
       setItems(saved);
+      prevItemsLengthRef.current = saved.length;
     }
     setInitialized(true);
+    // Scroll to bottom on initial load
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView();
+    });
   }, []);
 
   // ── Save messages whenever they change ──────────────────────────────────────
@@ -227,10 +241,44 @@ export default function ChatPage() {
     }
   }, [items, initialized]);
 
-  // ── Auto-scroll to bottom ───────────────────────────────────────────────────
+  // ── Smart auto-scroll: only on new messages, not on loading older ones ──────
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [items, loading]);
+    if (items.length > prevItemsLengthRef.current) {
+      // New message added — scroll to bottom
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      // Keep new messages in the visible window
+      setVisibleCount((prev) => prev + (items.length - prevItemsLengthRef.current));
+    }
+    prevItemsLengthRef.current = items.length;
+  }, [items.length]);
+
+  // Also scroll to bottom when loading starts (to show thinking indicator)
+  useEffect(() => {
+    if (loading) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [loading]);
+
+  // ── Pagination: visible items slice ─────────────────────────────────────────
+  const visibleItems = items.slice(Math.max(0, items.length - visibleCount));
+  const hasMore = visibleCount < items.length;
+
+  // ── Scroll handler: load more when scrolling near the top ──────────────────
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !hasMore || isLoadingMoreRef.current) return;
+    if (container.scrollTop < 100) {
+      isLoadingMoreRef.current = true;
+      const prevScrollHeight = container.scrollHeight;
+      setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, items.length));
+      // Preserve scroll position after React renders the new items
+      requestAnimationFrame(() => {
+        const newScrollHeight = container.scrollHeight;
+        container.scrollTop = newScrollHeight - prevScrollHeight;
+        isLoadingMoreRef.current = false;
+      });
+    }
+  }, [hasMore, items.length]);
 
   // ── Elapsed time counter while loading ──────────────────────────────────────
   useEffect(() => {
@@ -356,6 +404,8 @@ export default function ChatPage() {
   // ── Clear Chat ──────────────────────────────────────────────────────────────
   const handleClearChat = useCallback(() => {
     setItems([]);
+    setVisibleCount(INITIAL_PAGE_SIZE);
+    prevItemsLengthRef.current = 0;
     sessionStorage.removeItem(STORAGE_KEY);
     fetch("/api/chat/clear", { method: "POST" }).catch(() => { /* ignore */ });
   }, []);
@@ -381,9 +431,22 @@ export default function ChatPage() {
       {!hasMessages && !loading ? (
         <WelcomeScreen />
       ) : (
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {items.map((item, idx) => {
-            const prevItem = idx > 0 ? items[idx - 1] : undefined;
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        >
+          {/* Load more indicator */}
+          {hasMore && (
+            <div className="text-center py-2">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                Scroll up for earlier messages
+              </span>
+            </div>
+          )}
+
+          {visibleItems.map((item, idx) => {
+            const prevItem = idx > 0 ? visibleItems[idx - 1] : undefined;
             const showDate = needsDateSeparator(item, prevItem);
 
             return (
@@ -397,7 +460,7 @@ export default function ChatPage() {
                 ) : (
                   <ChatMessage
                     message={item}
-                    isLatest={idx === items.length - 1}
+                    isLatest={idx === visibleItems.length - 1 && !loading}
                   />
                 )}
               </div>

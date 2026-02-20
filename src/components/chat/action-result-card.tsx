@@ -69,40 +69,40 @@ const ACTION_CONFIG: Record<string, { label: string; icon: string; color: string
 
 const COLOR_MAP: Record<string, { bg: string; border: string; text: string; badge: string }> = {
   emerald: {
-    bg: "bg-emerald-500/5",
-    border: "border-emerald-500/20",
-    text: "text-emerald-400",
-    badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    text: "text-emerald-700",
+    badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
   },
   blue: {
-    bg: "bg-blue-500/5",
-    border: "border-blue-500/20",
-    text: "text-blue-400",
-    badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    text: "text-blue-700",
+    badge: "bg-blue-100 text-blue-700 border-blue-200",
   },
   red: {
-    bg: "bg-red-500/5",
-    border: "border-red-500/20",
-    text: "text-red-400",
-    badge: "bg-red-500/20 text-red-300 border-red-500/30",
+    bg: "bg-red-50",
+    border: "border-red-200",
+    text: "text-red-700",
+    badge: "bg-red-100 text-red-700 border-red-200",
   },
   amber: {
-    bg: "bg-amber-500/5",
-    border: "border-amber-500/20",
-    text: "text-amber-400",
-    badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    text: "text-amber-700",
+    badge: "bg-amber-100 text-amber-700 border-amber-200",
   },
   slate: {
-    bg: "bg-slate-500/5",
-    border: "border-slate-500/20",
-    text: "text-slate-400",
-    badge: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+    bg: "bg-slate-50",
+    border: "border-slate-200",
+    text: "text-slate-600",
+    badge: "bg-slate-100 text-slate-600 border-slate-200",
   },
   purple: {
-    bg: "bg-purple-500/5",
-    border: "border-purple-500/20",
-    text: "text-purple-400",
-    badge: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+    bg: "bg-purple-50",
+    border: "border-purple-200",
+    text: "text-purple-700",
+    badge: "bg-purple-100 text-purple-700 border-purple-200",
   },
 };
 
@@ -133,7 +133,7 @@ function SingleCard({ result }: { result: ActionResult }) {
         <span
           className={cn(
             "ml-auto text-[10px] px-1.5 py-0.5 rounded-full border font-medium",
-            result.success ? colors.badge : "bg-red-500/20 text-red-300 border-red-500/30"
+            result.success ? colors.badge : "bg-red-100 text-red-700 border-red-200"
           )}
         >
           {result.success ? "Success" : "Failed"}
@@ -141,7 +141,7 @@ function SingleCard({ result }: { result: ActionResult }) {
       </div>
 
       {/* Message */}
-      <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+      <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
         {result.message}
       </p>
 
@@ -151,7 +151,7 @@ function SingleCard({ result }: { result: ActionResult }) {
           {Object.entries(result.data).map(([key, value]) => (
             <span
               key={key}
-              className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 text-slate-400 border border-slate-700/50 font-mono"
+              className="text-[10px] px-2 py-0.5 rounded-lg bg-white text-slate-500 border border-slate-200 font-mono"
             >
               {key}: {String(value)}
             </span>
@@ -175,14 +175,14 @@ export function ActionResultCards({ results }: ActionResultCardProps) {
       <div className="flex-1 min-w-0 space-y-2">
         {/* Section header */}
         <div className="flex items-center gap-2">
-          <div className="h-px flex-1 bg-gradient-to-r from-blue-500/20 to-transparent" />
-          <span className="text-[10px] text-blue-400/60 font-medium uppercase tracking-wider flex items-center gap-1">
+          <div className="h-px flex-1 bg-gradient-to-r from-brand-500/20 to-transparent" />
+          <span className="text-[10px] text-brand-500/60 font-medium uppercase tracking-wider flex items-center gap-1">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Platform Actions
           </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-blue-500/20 to-transparent" />
+          <div className="h-px flex-1 bg-gradient-to-l from-brand-500/20 to-transparent" />
         </div>
 
         {/* Cards */}

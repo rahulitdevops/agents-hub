@@ -17,16 +17,17 @@ services:
       - OPENCLAW_GATEWAY_PORT=18789
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:-}
       - WORKER_POOL_URL=http://worker-pool:18790
+      - AGENT_CONTAINER_IMAGE=agents-hub-worker-pool
+      - DOCKER_NETWORK=agents-hub_default
     volumes:
       - openclaw-data:/app/data
       - openclaw-config:/app/openclaw-config
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       gateway:
         condition: service_healthy
-      worker-pool:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/analytics"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/analytics"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -61,7 +62,9 @@ services:
       retries: 5
       start_period: 20s
 
-  # ─── OpenClaw Worker Pool (sub-agent task execution) ───────────────────────
+  # ─── OpenClaw Worker Pool (legacy fallback + image builder for agent containers)
+  # This service builds the image that per-agent containers reuse.
+  # Also serves as a fallback execution pool when Docker socket is unavailable.
   worker-pool:
     build:
       context: .
@@ -97,4 +100,6 @@ volumes:
   openclaw-config:
     driver: local
   openclaw-workspace:
+    driver: local
+  openclaw-agent-sessions:
     driver: local

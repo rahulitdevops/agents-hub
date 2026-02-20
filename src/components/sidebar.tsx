@@ -25,15 +25,17 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-slate-900/50 border-r border-slate-800 flex flex-col shrink-0">
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
       {/* Logo */}
-      <div className="p-5 flex items-center gap-3 border-b border-slate-800">
-        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 text-xl">
-          🦞
+      <div className="p-5 flex items-center gap-3 border-b border-slate-200">
+        <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+          </svg>
         </div>
         <div>
-          <div className="text-white font-bold text-sm">OpenClaw</div>
-          <div className="text-slate-500 text-xs">Agent Platform</div>
+          <div className="text-slate-900 font-bold text-sm">Agent Hub</div>
+          <div className="text-slate-400 text-xs">Management Platform</div>
         </div>
       </div>
 
@@ -48,8 +50,8 @@ export function Sidebar() {
               className={cn(
                 "w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all",
                 active
-                  ? "bg-orange-600/15 text-orange-400 shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                  ? "bg-brand-50 text-brand-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
               )}
             >
               <NavIcon d={item.icon} />
@@ -60,12 +62,12 @@ export function Sidebar() {
       </nav>
 
       {/* Gateway status */}
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-slate-200">
         <div className="flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-slow" />
-          <span className="text-slate-400">Gateway connected</span>
+          <span className="text-slate-500">Gateway connected</span>
         </div>
-        <div className="text-slate-600 text-xs mt-1">ws://127.0.0.1:18789</div>
+        <div className="text-slate-400 text-xs mt-1">ws://127.0.0.1:18789</div>
       </div>
     </aside>
   );

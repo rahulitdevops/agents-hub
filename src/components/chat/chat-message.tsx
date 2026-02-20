@@ -61,8 +61,8 @@ function CopyButton({ text, size = "sm" }: { text: string; size?: "sm" | "xs" })
           ? "px-2 py-1 text-[11px]"
           : "px-1.5 py-0.5 text-[10px]",
         copied
-          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-          : "bg-slate-800/80 text-slate-400 border border-slate-700/50 hover:text-slate-200 hover:border-slate-600 hover:bg-slate-700/80"
+          ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+          : "bg-slate-100 text-slate-500 border border-slate-200 hover:text-slate-700 hover:border-slate-300 hover:bg-slate-50"
       )}
       title="Copy to clipboard"
     >
@@ -96,7 +96,7 @@ function CodeBlock({ children, className, ...props }: React.HTMLAttributes<HTMLE
   if (!className) {
     return (
       <code
-        className="px-1.5 py-0.5 rounded-md bg-slate-800 text-orange-300 text-[13px] font-mono border border-slate-700/50"
+        className="px-1.5 py-0.5 rounded-md bg-slate-100 text-brand-700 text-[13px] font-mono border border-slate-200"
         {...props}
       >
         {children}
@@ -106,9 +106,9 @@ function CodeBlock({ children, className, ...props }: React.HTMLAttributes<HTMLE
 
   // Block code with copy button
   return (
-    <div className="relative group/code my-3 rounded-xl overflow-hidden border border-slate-700/50">
+    <div className="relative group/code my-3 rounded-xl overflow-hidden border border-slate-200">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800/80 border-b border-slate-700/50">
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-50 border-b border-slate-200">
         <span className="text-[11px] text-slate-400 font-mono uppercase tracking-wider">
           {language || "code"}
         </span>
@@ -147,25 +147,25 @@ const markdownComponents = {
   code: CodeBlock as any,
   // Tables
   table: ({ children, ...props }: React.HTMLAttributes<HTMLTableElement>) => (
-    <div className="my-3 overflow-x-auto rounded-lg border border-slate-700/50">
+    <div className="my-3 overflow-x-auto rounded-lg border border-slate-200">
       <table className="w-full text-sm" {...props}>{children}</table>
     </div>
   ),
   thead: ({ children, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) => (
-    <thead className="bg-slate-800/50 text-slate-300" {...props}>{children}</thead>
+    <thead className="bg-slate-50 text-slate-600" {...props}>{children}</thead>
   ),
   th: ({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>) => (
-    <th className="px-3 py-2 text-left text-xs font-semibold border-b border-slate-700/50" {...props}>{children}</th>
+    <th className="px-3 py-2 text-left text-xs font-semibold border-b border-slate-200" {...props}>{children}</th>
   ),
   td: ({ children, ...props }: React.HTMLAttributes<HTMLTableCellElement>) => (
-    <td className="px-3 py-2 text-sm border-b border-slate-800/50" {...props}>{children}</td>
+    <td className="px-3 py-2 text-sm border-b border-slate-100" {...props}>{children}</td>
   ),
   // Lists
   ul: ({ children, ...props }: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="my-2 ml-4 space-y-1 list-disc marker:text-slate-500" {...props}>{children}</ul>
+    <ul className="my-2 ml-4 space-y-1 list-disc marker:text-slate-400" {...props}>{children}</ul>
   ),
   ol: ({ children, ...props }: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="my-2 ml-4 space-y-1 list-decimal marker:text-slate-500" {...props}>{children}</ol>
+    <ol className="my-2 ml-4 space-y-1 list-decimal marker:text-slate-400" {...props}>{children}</ol>
   ),
   li: ({ children, ...props }: React.HTMLAttributes<HTMLLIElement>) => (
     <li className="text-sm leading-relaxed pl-1" {...props}>{children}</li>
@@ -173,7 +173,7 @@ const markdownComponents = {
   // Blockquotes
   blockquote: ({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>) => (
     <blockquote
-      className="my-3 pl-4 border-l-2 border-orange-500/50 text-slate-300 italic bg-slate-800/30 rounded-r-lg py-2 pr-3"
+      className="my-3 pl-4 border-l-2 border-brand-500/50 text-slate-600 italic bg-slate-50 rounded-r-lg py-2 pr-3"
       {...props}
     >
       {children}
@@ -181,13 +181,13 @@ const markdownComponents = {
   ),
   // Headings
   h1: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1 className="text-lg font-bold text-white mt-4 mb-2 pb-1 border-b border-slate-700/50" {...props}>{children}</h1>
+    <h1 className="text-lg font-bold text-slate-900 mt-4 mb-2 pb-1 border-b border-slate-200" {...props}>{children}</h1>
   ),
   h2: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2 className="text-base font-bold text-white mt-3 mb-1.5" {...props}>{children}</h2>
+    <h2 className="text-base font-bold text-slate-900 mt-3 mb-1.5" {...props}>{children}</h2>
   ),
   h3: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3 className="text-sm font-bold text-white mt-3 mb-1" {...props}>{children}</h3>
+    <h3 className="text-sm font-bold text-slate-900 mt-3 mb-1" {...props}>{children}</h3>
   ),
   // Paragraphs
   p: ({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
@@ -199,20 +199,20 @@ const markdownComponents = {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-orange-400 hover:text-orange-300 underline underline-offset-2 decoration-orange-500/30 transition-colors"
+      className="text-brand-600 hover:text-brand-500 underline underline-offset-2 decoration-brand-500/30 transition-colors"
       {...props}
     >
       {children}
     </a>
   ),
   // Horizontal rule
-  hr: () => <hr className="my-4 border-slate-700/50" />,
+  hr: () => <hr className="my-4 border-slate-200" />,
   // Strong / emphasis
   strong: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
-    <strong className="font-semibold text-white" {...props}>{children}</strong>
+    <strong className="font-semibold text-slate-900" {...props}>{children}</strong>
   ),
   em: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
-    <em className="italic text-slate-300" {...props}>{children}</em>
+    <em className="italic text-slate-600" {...props}>{children}</em>
   ),
 };
 
@@ -234,16 +234,16 @@ function AssistantMessage({ message }: { message: ChatMessageData }) {
       <div className="min-w-0 flex-1">
         {/* Name + model */}
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-sm font-semibold text-emerald-400">Groot</span>
+          <span className="text-sm font-semibold text-emerald-600">Groot</span>
           {modelShort && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-500 border border-slate-700/50 font-mono">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 font-mono">
               {modelShort}
             </span>
           )}
         </div>
 
         {/* Markdown body */}
-        <div className="prose-chat text-slate-200">
+        <div className="prose-chat text-slate-700">
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkBreaks]}
             rehypePlugins={[rehypeHighlight]}
@@ -255,9 +255,9 @@ function AssistantMessage({ message }: { message: ChatMessageData }) {
 
         {/* Footer: time + tokens + duration + copy */}
         <div className="flex items-center gap-3 mt-2 pt-1.5">
-          <span className="text-[10px] text-slate-600">{formatTime(message.timestamp)}</span>
+          <span className="text-[10px] text-slate-400">{formatTime(message.timestamp)}</span>
           {message.tokensUsed ? (
-            <span className="text-[10px] text-slate-600 flex items-center gap-1">
+            <span className="text-[10px] text-slate-400 flex items-center gap-1">
               <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
@@ -265,7 +265,7 @@ function AssistantMessage({ message }: { message: ChatMessageData }) {
             </span>
           ) : null}
           {message.duration ? (
-            <span className="text-[10px] text-slate-600 flex items-center gap-1">
+            <span className="text-[10px] text-slate-400 flex items-center gap-1">
               <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -287,18 +287,18 @@ function UserMessage({ message }: { message: ChatMessageData }) {
   return (
     <div className="flex gap-3 justify-end">
       <div className="max-w-[75%]">
-        <div className="bg-orange-600 text-white rounded-2xl rounded-br-md px-4 py-3 shadow-lg shadow-orange-600/10">
+        <div className="bg-brand-600 text-white rounded-2xl rounded-br-md px-4 py-3 shadow-lg shadow-brand-600/10">
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
         </div>
         <div className="flex justify-end mt-1">
-          <span className="text-[10px] text-slate-600">{formatTime(message.timestamp)}</span>
+          <span className="text-[10px] text-slate-400">{formatTime(message.timestamp)}</span>
         </div>
       </div>
 
       {/* User avatar */}
       <div className="flex-shrink-0 mt-1">
-        <div className="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center text-sm shadow-lg shadow-slate-500/10">
-          <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="w-8 h-8 bg-gradient-to-br from-slate-200 to-slate-300 rounded-xl flex items-center justify-center text-sm shadow-lg shadow-slate-200/10">
+          <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
         </div>
@@ -322,14 +322,14 @@ function SystemMessage({ message }: { message: ChatMessageData }) {
         className={cn(
           "max-w-lg rounded-xl px-4 py-2.5 text-center transition-all",
           isWelcome
-            ? "bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 text-emerald-300"
+            ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
             : isError
-              ? "bg-red-500/10 border border-red-500/20 text-red-300"
+              ? "bg-red-50 border border-red-200 text-red-700"
               : isAction
-                ? "bg-blue-500/10 border border-blue-500/20 text-blue-300"
+                ? "bg-blue-50 border border-blue-200 text-blue-700"
                 : isCancelled
-                  ? "bg-amber-500/10 border border-amber-500/20 text-amber-300"
-                  : "bg-slate-800/40 border border-slate-700/30 text-slate-400"
+                  ? "bg-amber-50 border border-amber-200 text-amber-700"
+                  : "bg-slate-100 border border-slate-200 text-slate-500"
         )}
       >
         <p className="text-xs leading-relaxed">{message.content}</p>
