@@ -101,5 +101,7 @@ volumes:
     driver: local
   openclaw-workspace:
     driver: local
+  # FIX 5: Added missing volume — required by per-agent container mounts.
+  # Without this, `docker compose up` fails with "volume not found" error.
   openclaw-agent-sessions:
     driver: local

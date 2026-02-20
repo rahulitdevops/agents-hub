@@ -3,6 +3,9 @@
  *
  * This is the single source of truth for all models available in the platform.
  * To add a new model: add one object to MODEL_REGISTRY. Nothing else needs changing.
+ *
+ * FIX: Added MODEL_PRICING map and getCostPerToken() helper.
+ *      Cost calculations now use actual per-model rates instead of a flat $3/M average.
  */
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -219,6 +222,55 @@ export function getModelDef(id: string): ModelDef | undefined {
 export function getRecommendedModels(role: AgentRoleHint): ModelDef[] {
   return MODEL_REGISTRY.filter((m) => m.recommendedRoles.includes(role));
 }
+
+// ─── Pricing ──────────────────────────────────────────────────────────────────
+// FIX: Per-model pricing instead of a flat $3/M rate for all models.
+// All prices are in USD per 1M tokens (input / output split).
+// Assumption: 50/50 input-output split for average cost per token.
+
+export interface ModelPricing {
+  /** Price per 1M input tokens in USD */
+  inputPerM: number;
+  /** Price per 1M output tokens in USD */
+  outputPerM: number;
+}
+
+export const MODEL_PRICING: Record<string, ModelPricing> = {
+  // Anthropic
+  "anthropic/claude-opus-4-6":     { inputPerM: 15,    outputPerM: 75    },
+  "anthropic/claude-sonnet-4-6":   { inputPerM: 3,     outputPerM: 15    },
+  "anthropic/claude-sonnet-4-5":   { inputPerM: 3,     outputPerM: 15    },
+  "anthropic/claude-haiku-4-5":    { inputPerM: 0.8,   outputPerM: 4     },
+  // OpenAI
+  "openai/gpt-4o":                 { inputPerM: 2.5,   outputPerM: 10    },
+  "openai/gpt-4o-mini":            { inputPerM: 0.15,  outputPerM: 0.6   },
+  // Google
+  "google/gemini-2.0-flash":       { inputPerM: 0.075, outputPerM: 0.3   },
+  "google/gemini-1.5-pro":         { inputPerM: 1.25,  outputPerM: 5     },
+  // DeepSeek
+  "deepseek/deepseek-r1":          { inputPerM: 0.55,  outputPerM: 2.19  },
+  // Groq (Llama)
+  "groq/llama-3.3-70b-versatile":  { inputPerM: 0.59,  outputPerM: 0.79  },
+  // Mistral
+  "mistral/mistral-large-latest":  { inputPerM: 2,     outputPerM: 6     },
+};
+
+/**
+ * Returns average cost per token for a given model (USD).
+ * Assumes 50/50 input/output split.
+ * Falls back to a conservative $3/M average if model not found.
+ */
+export function getCostPerToken(modelId: string): number {
+  const pricing = MODEL_PRICING[modelId];
+  if (!pricing) {
+    console.warn(`[model-registry] No pricing found for model "${modelId}", using fallback $3/M`);
+    return 0.000003; // fallback: $3/M avg
+  }
+  // Average of input + output, divided by 1M
+  return (pricing.inputPerM + pricing.outputPerM) / 2 / 1_000_000;
+}
+
+// ─── Display Configs ─────────────────────────────────────────────────────────
 
 /** Tier badge display config */
 export const TIER_CONFIG: Record<ModelTier, { label: string; classes: string }> = {

@@ -20,6 +20,9 @@ import { resolveAgentPlatformEnv } from "@/lib/platform-integrations";
  *
  * Model comes from openclaw.json (synced when changed in Agents UI).
  * API keys come from auth-profiles.json (synced from Settings page).
+ *
+ * FIX: Improved error surfacing — stderr is now returned in the error response
+ *      so the client can show actionable error messages instead of generic ones.
  */
 
 const OPENCLAW_AGENT_NAME = process.env.OPENCLAW_AGENT_NAME || "main";
@@ -39,8 +42,6 @@ function ensureAuthProfiles(): boolean {
   const key = apiKey || process.env.ANTHROPIC_API_KEY || "";
   if (!key) return false;
 
-  // Use type:"token" to match openclaw.json auth.profiles which declare mode:"token"
-  // If types don't match, openclaw's resolveAuthProfileOrder filters the profile out
   const profiles: Record<string, unknown> = {
     "anthropic:default": { type: "token", provider: "anthropic", token: key },
   };
@@ -115,7 +116,6 @@ function syncModelConfig() {
 
 /**
  * Write PLATFORM-CONTEXT.md to the workspace before every agent call.
- * This gives Groot awareness of the current agent roster and action format.
  */
 function writeAgentContext() {
   const agents = runtime.getAgents();
@@ -188,13 +188,8 @@ Updated: ${new Date().toISOString()}
   }
 }
 
-// ─── Agent Context Injection (into message) ─────────────────────────────────
-
 /**
- * Build a concise context prefix that gets prepended to every user message.
- * This ensures Groot ALWAYS knows about the sub-agents, regardless of whether
- * it reads workspace files. The openclaw CLI has no --system-prompt flag, so
- * injecting context into the message is the only reliable per-call mechanism.
+ * Build a concise context prefix injected into every user message.
  */
 function buildAgentContextPrefix(): string {
   const agents = runtime.getAgents();
@@ -252,8 +247,7 @@ export async function POST(req: NextRequest) {
     const thinkLevel = thinking || groot?.thinking || "medium";
     const startTime = Date.now();
 
-    // Inject platform context (agent roster) directly into the message
-    // so Groot always knows about sub-agents regardless of workspace file reads
+    // Inject platform context into the message
     const contextPrefix = buildAgentContextPrefix();
     const contextualMessage = contextPrefix + message;
 
@@ -293,7 +287,6 @@ export async function POST(req: NextRequest) {
       model: response.model || groot?.model || "anthropic/claude-opus-4-6",
       tokensUsed: response.tokensUsed || 0,
       duration: Date.now() - startTime,
-      // Expose action results so frontend can refresh agent list
       agentActions: actionResults.length > 0 ? actionResults : undefined,
     });
   } catch (error: unknown) {
@@ -340,20 +333,41 @@ function callLocalAgent(params: AgentParams): Promise<AgentResponse> {
       maxBuffer: 10 * 1024 * 1024,
       env: {
         ...process.env,
-        ...(params.platformEnv || {}), // Inject platform credentials as env vars
+        ...(params.platformEnv || {}),
         HOME: "/root",
       },
     }, (error, stdout, stderr) => {
-      if (stderr) {
-        console.log("[chat] stderr:", stderr.substring(0, 500));
+      // FIX: Log full stderr for server-side debugging
+      if (stderr?.trim()) {
+        console.log("[chat] stderr:", stderr.substring(0, 1000));
       }
 
       if (error) {
-        console.error("[chat] exec error:", error.message);
+        console.error("[chat] exec error:", error.message, "code:", (error as NodeJS.ErrnoException).code);
+
         if (!stdout?.trim()) {
-          const errDetail = stderr?.includes("No API key")
-            ? "No API key configured. Please add your Anthropic API key in Settings."
-            : error.message;
+          // FIX: Return actionable error messages with stderr context
+          let errDetail: string;
+
+          if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+            errDetail =
+              "openclaw binary not found. Make sure openclaw is installed in the platform container. " +
+              "Run: docker exec openclaw-platform which openclaw";
+          } else if (stderr?.includes("No API key") || stderr?.includes("auth") || stderr?.includes("401")) {
+            errDetail =
+              "Authentication failed. Go to Settings and verify your Anthropic API key is saved correctly.";
+          } else if (error.killed || error.signal === "SIGTERM") {
+            errDetail =
+              "Request timed out (120s limit). Try a shorter message or reduce thinking level to 'low'.";
+          } else if (stderr?.includes("ECONNREFUSED") || stderr?.includes("gateway")) {
+            errDetail =
+              "Cannot connect to OpenClaw Gateway. Check that the gateway container is running: docker ps | grep gateway";
+          } else {
+            // FIX: Include stderr in the error so the user can see what actually went wrong
+            const stderrSnippet = stderr?.trim().substring(0, 300) || "no stderr output";
+            errDetail = `Agent execution failed: ${error.message}. Details: ${stderrSnippet}`;
+          }
+
           reject(new Error(errDetail));
           return;
         }
@@ -361,7 +375,15 @@ function callLocalAgent(params: AgentParams): Promise<AgentResponse> {
 
       const output = stdout?.trim();
       if (!output) {
-        reject(new Error("Empty response from agent"));
+        // FIX: Include stderr in empty response error
+        const stderrSnippet = stderr?.trim().substring(0, 400) || "no stderr output";
+        reject(
+          new Error(
+            `Empty response from agent. ` +
+            `This usually means openclaw is not installed in the platform container, ` +
+            `or the agent crashed silently. stderr: ${stderrSnippet}`
+          )
+        );
         return;
       }
 
@@ -387,12 +409,13 @@ function callLocalAgent(params: AgentParams): Promise<AgentResponse> {
         }
 
         // Fallback: other JSON formats
-        const text = result.text
-          || result.content
-          || result.reply
-          || result.result?.text
-          || result.result?.content
-          || result.message;
+        const text =
+          result.text ||
+          result.content ||
+          result.reply ||
+          result.result?.text ||
+          result.result?.content ||
+          result.message;
 
         if (text) {
           resolve({
@@ -404,9 +427,10 @@ function callLocalAgent(params: AgentParams): Promise<AgentResponse> {
         }
 
         if (result.error) {
-          const errMsg = typeof result.error === "string"
-            ? result.error
-            : result.error.message || JSON.stringify(result.error);
+          const errMsg =
+            typeof result.error === "string"
+              ? result.error
+              : result.error.message || JSON.stringify(result.error);
           reject(new Error(errMsg));
           return;
         }

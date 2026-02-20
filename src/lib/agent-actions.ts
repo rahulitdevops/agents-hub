@@ -7,6 +7,7 @@
  */
 
 import { runtime, MODELS } from "./openclaw-runtime";
+import { getCostPerToken } from "./model-registry";
 import { GROOT_AGENT_ID, type AgentConfig } from "./types";
 import { dispatchToWorkerPoolAsync } from "./worker-client";
 import { loadPlatformIntegrations } from "./settings";
@@ -450,7 +451,7 @@ function executeAssignTask(params: Record<string, unknown>): ActionResult {
         const existing = runtime.getAgent(agentId);
         if (existing) {
           const newTokens = existing.metrics.tokensUsed + (result.tokensUsed || 0);
-          const costPerToken = 0.000003; // ~$3 per 1M tokens average
+          const costPerToken = getCostPerToken(agent.model); // per-model pricing
           const taskCost = (result.tokensUsed || 0) * costPerToken;
           const completedCount = existing.metrics.tasksCompleted + (result.success ? 1 : 0);
           const prevTotal = existing.metrics.tasksCompleted;
