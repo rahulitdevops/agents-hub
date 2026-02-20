@@ -156,3 +156,25 @@ body {
   border: 1px solid rgba(226, 232, 240, 1);
   max-width: 100%;
 }
+
+/* ─── Toast slide-in animation ────────────────────────────────────────────── */
+
+@keyframes slide-in-toast {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-slide-in {
+  animation: slide-in-toast 0.3s ease-out;
+}
+
+/* ─── Pulse slow for gateway indicator ────────────────────────────────────── */
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
