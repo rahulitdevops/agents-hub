@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,28 @@ function NavIcon({ d }: { d: string }) {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [gatewayStatus, setGatewayStatus] = useState<{ connected: boolean; url: string; agents: number }>({
+    connected: false,
+    url: "ws://127.0.0.1:18789",
+    agents: 0,
+  });
+
+  useEffect(() => {
+    async function checkGateway() {
+      try {
+        const res = await fetch("/api/analytics");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.gateway) setGatewayStatus(data.gateway);
+        }
+      } catch {
+        setGatewayStatus((prev) => ({ ...prev, connected: false }));
+      }
+    }
+    checkGateway();
+    const interval = setInterval(checkGateway, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
@@ -61,13 +84,18 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Gateway status */}
+      {/* Gateway status — dynamic */}
       <div className="p-4 border-t border-slate-200">
         <div className="flex items-center gap-2 text-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-slow" />
-          <span className="text-slate-500">Gateway connected</span>
+          <span className={`w-2 h-2 rounded-full ${gatewayStatus.connected ? "bg-emerald-500 animate-pulse-slow" : "bg-red-400"}`} />
+          <span className="text-slate-500">
+            {gatewayStatus.connected ? "Gateway connected" : "Gateway disconnected"}
+          </span>
         </div>
-        <div className="text-slate-400 text-xs mt-1">ws://127.0.0.1:18789</div>
+        <div className="text-slate-400 text-xs mt-1">{gatewayStatus.url}</div>
+        {gatewayStatus.connected && gatewayStatus.agents > 0 && (
+          <div className="text-slate-400 text-xs mt-0.5">{gatewayStatus.agents} agent{gatewayStatus.agents !== 1 ? "s" : ""} active</div>
+        )}
       </div>
     </aside>
   );

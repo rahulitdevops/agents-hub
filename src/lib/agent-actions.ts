@@ -21,6 +21,7 @@ import {
   execInAgentContainer,
   dispatchDirectExecution,
 } from "./container-manager";
+import { executeDelegateTask, executeSendMessage } from "./agent-bus";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -98,6 +99,10 @@ export function executeAction(action: AgentAction): ActionResult {
         return executeListAgents();
       case "assign_task":
         return executeAssignTask(params);
+      case "delegate_task":
+        return executeDelegateTask(params);
+      case "send_message":
+        return executeSendMessage(params);
       default:
         return {
           action: actionType,
