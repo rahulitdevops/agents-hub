@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { Task, AgentConfig, TaskStatus } from "@/lib/types";
 import { TaskBoard } from "@/components/task-board";
+import { useTaskStream } from "@/hooks/useTaskStream";
 
 const STATUS_STYLES: Record<string, string> = {
   completed: "text-emerald-600",
@@ -22,12 +23,29 @@ const PRIORITY_STYLES: Record<string, string> = {
 
 type ViewMode = "table" | "board";
 
-export function TasksClient({ tasks: initial, agents }: { tasks: Task[]; agents: AgentConfig[] }) {
+export function TasksClient({ tasks: initial, agents: initialAgents }: { tasks: Task[]; agents: AgentConfig[] }) {
   const [tasks, setTasks] = useState(initial);
+  const [agents, setAgents] = useState(initialAgents);
   const [statusFilter, setStatusFilter] = useState<"all" | TaskStatus>("all");
   const [agentFilter, setAgentFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("board");
+
+  // Subscribe to real-time task updates via SSE
+  const { tasks: liveTasks, agents: liveAgents, connected } = useTaskStream();
+
+  // Sync live SSE data into local state
+  useEffect(() => {
+    if (liveTasks.length > 0 || connected) {
+      setTasks(liveTasks);
+    }
+  }, [liveTasks, connected]);
+
+  useEffect(() => {
+    if (liveAgents.length > 0) {
+      setAgents(liveAgents);
+    }
+  }, [liveAgents]);
 
   const filtered = tasks.filter((t) => {
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
